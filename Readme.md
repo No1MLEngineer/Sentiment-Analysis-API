@@ -1,0 +1,85 @@
+# Simple Sentiment Analysis API
+
+## Project Overview
+
+This project builds a basic web API that performs sentiment analysis on text input. It uses a Logistic Regression model trained on movie review data (using TF-IDF features) to classify text as either "positive" or "negative". The model and necessary components are served via a simple Flask application.
+
+This serves as a foundational example of an end-to-end Machine Learning workflow, from data preparation to model deployment as an accessible service.
+
+## Features
+
+*   Loads and preprocesses text data (movie reviews).
+*   Uses TF-IDF (Term Frequency-Inverse Document Frequency) for text feature extraction.
+*   Trains a Logistic Regression model using Scikit-learn.
+*   Saves the trained model and TF-IDF vectorizer using Joblib for persistence.
+*   Provides a Flask API with two endpoints:
+    *   `/` (GET): Simple status check endpoint.
+    *   `/predict` (POST): Accepts JSON input `{"text": "Your text here"}`, predicts sentiment, and returns a JSON response `{"input_text": ..., "predicted_sentiment": ..., "confidence_score": ...}`.
+*   Includes steps for temporary deployment using Ngrok (useful for testing/Colab).
+
+## Technology Stack
+
+*   **Python 3.x**
+*   **Scikit-learn:** For TF-IDF, Logistic Regression model, evaluation.
+*   **Pandas:** Data loading and manipulation.
+*   **NumPy:** Numerical operations.
+*   **Joblib:** Saving and loading Python objects (model, vectorizer).
+*   **Flask:** Micro web framework for creating the API.
+*   **Pyngrok (Optional but used in demo):** For creating secure tunnels to localhost (essential for testing from Colab).
+*   **NLTK / Regex:** Used for text preprocessing steps.
+
+## Setup and Installation (Colab Example)
+
+1.  **Data:** Obtain the `movie_data.csv.gz` dataset (or a similar CSV with 'review' and 'sentiment' columns). Upload it to your environment if necessary.
+2.  **Training:** Execute the `train_sentiment.py` script (or equivalent Colab cells). This script performs data loading, preprocessing, TF-IDF fitting, model training, and saves two files:
+    *   `tfidf_vectorizer.joblib`
+    *   `sentiment_model.joblib`
+3.  **API Dependencies & Ngrok Setup (If using Colab/Tunneling):**
+    *   Sign up for a free account at [https://ngrok.com/](https://ngrok.com/).
+    *   Get your Authtoken from [https://dashboard.ngrok.com/get-started/your-authtoken](https://dashboard.ngrok.com/get-started/your-authtoken).
+    *   In a cell **before** running the API app code, execute:
+        ```python
+        # Install necessary libraries
+        !pip install Flask scikit-learn pandas numpy joblib pyngrok
+
+        # Configure ngrok - REPLACE YOUR_AUTHTOKEN with your actual token
+        # IMPORTANT: Do not commit your real token to public repositories!
+        !ngrok config add-authtoken YOUR_AUTHTOKEN
+        ```
+4.  **Run the API:** Execute the `app.py` script (or the equivalent combined Colab cell). Make sure the `.joblib` files are in the same directory or accessible path. If using Ngrok, the script should print a public URL (e.g., `https://<random-string>.ngrok-free.app`).
+
+## How to Use the API
+
+Once the Flask server is running (and you have the Ngrok URL if applicable):
+
+**1. Check Status:**
+
+*   Send a `GET` request to the base URL (e.g., `http://127.0.0.1:5000/` or your Ngrok URL).
+*   **Expected Response:** `{"message": "Sentiment Analysis API is running!"}`
+
+**2. Predict Sentiment:**
+
+*   Send a `POST` request to the `/predict` endpoint (e.g., `http://127.0.0.1:5000/predict` or `https://<your-ngrok-url>/predict`).
+*   **Headers:** `Content-Type: application/json`
+*   **Body (raw JSON):** Provide the text you want to analyze.
+    ```json
+    {
+        "text": "This movie was incredibly boring and a waste of time."
+    }
+    ```
+*   **Example `curl`:**
+    ```bash
+    curl -X POST -H "Content-Type: application/json" \
+    -d '{"text": "This movie was incredibly boring and a waste of time."}' \
+    http://127.0.0.1:5000/predict
+    ```
+*   **Expected Response:**
+    ```json
+    {
+        "input_text": "This movie was incredibly boring and a waste of time.",
+        "predicted_sentiment": "negative",
+        "confidence_score": 0.98...
+    }
+    ```
+
+## Project Structure
